@@ -38,10 +38,18 @@ options.register('maxJetEta', 2.5,
     VarParsing.varType.float,
     "Maximum jet |eta| (default is 2.5)"
 )
+
 options.register('minJetPt', 20.0,
     VarParsing.multiplicity.singleton,
     VarParsing.varType.float,
     "Minimum jet pt (default is 20)"
+)
+
+
+options.register('trackPtSeed', 0.4,
+    VarParsing.multiplicity.singleton,
+    VarParsing.varType.float,
+    "Global Pt Seed  (default is 0.4)"
 )
 
 options.register('globalTag', '110X_mcRun3_2021_realistic_v6',
@@ -23063,13 +23071,21 @@ process.selectedEvents = eventCounter.clone()
 #    process.primaryVertexFilter
 #)
 
-# update the PF configuration
-from RecoBTag.PerformanceMeasurements.customise import customize_HLT_trkIter2GlobalPtSeed0p9
-process = customize_HLT_trkIter2GlobalPtSeed0p9(process)
+## update the PF configuration
+#from RecoBTag.PerformanceMeasurements.customise import customize_HLT_trkIter2GlobalPtSeed0p9
+#process = customize_HLT_trkIter2GlobalPtSeed0p9(process)
+# 
+## update the b-tagging configuration
+#from RecoBTag.PerformanceMeasurements.customise import customize_HLT_trkIter2GlobalPtSeed0p9ForBTag
+#process = customize_HLT_trkIter2GlobalPtSeed0p9ForBTag(process)
+
+from RecoBTag.PerformanceMeasurements.customise import customize_HLT_trkIter2GlobalPtSeedXX
+process = customize_HLT_trkIter2GlobalPtSeedXX(process,options.trackPtSeed)
  
 # update the b-tagging configuration
-from RecoBTag.PerformanceMeasurements.customise import customize_HLT_trkIter2GlobalPtSeed0p9ForBTag
-process = customize_HLT_trkIter2GlobalPtSeed0p9ForBTag(process)
+from RecoBTag.PerformanceMeasurements.customise import customize_HLT_trkIter2GlobalPtSeedXXForBTag
+process = customize_HLT_trkIter2GlobalPtSeedXXForBTag(process,options.trackPtSeed)
+
 
 ## Define analyzer sequence
 process.analyzerSeq = cms.Sequence( )

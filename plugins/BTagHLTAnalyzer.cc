@@ -328,7 +328,7 @@ BTagHLTAnalyzerT<IPTI,VTX>::BTagHLTAnalyzerT(const edm::ParameterSet& iConfig):
   runHLTJetVariables_ = iConfig.getParameter<bool>("runHLTJetVariables");
 
   // Modules
-  primaryVertexColl_   = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("primaryVertexColl"));
+  primaryVertexColl_   = consumes<reco::VertexCollection>(iConfig.getParameter<edm::InputTag>("HLTprimaryVertexColl"));
 
 //
 //  branchNamePrefix_ = iConfig.getParameter<std::string>("BranchNamePrefix");
@@ -539,7 +539,8 @@ void BTagHLTAnalyzerT<IPTI,VTX>::processHLTJets(const edm::Handle<JetColl>& jets
   JetInfo[iJetColl].nTrkTagVar = 0;
   JetInfo[iJetColl].nSVTagVar  = 0;
   JetInfo[iJetColl].nSV = 0;
-  JetInfo[iJetColl].nTrkTagVarCSV = 0;
+  JetInfo[iJetColl].nTrkEtaRelTagVarCSV = 0;
+  //JetInfo[iJetColl].nTrkTagVarCSV = 0;
   //xstd::cout << "getting jetTags Coll " << std::endl;
   edm::Handle <ShallowTagCollection> jetTagsColl;
   iEvent.getByToken (jetTagsCollToken, jetTagsColl);
@@ -620,15 +621,116 @@ void BTagHLTAnalyzerT<IPTI,VTX>::processHLTJets(const edm::Handle<JetColl>& jets
 	  
 	  JetInfo[iJetColl].TagVar_jetNTracks[JetInfo[iJetColl].nJet]                  = nTracks;
 	  JetInfo[iJetColl].TagVar_jetNSecondaryVertices[JetInfo[iJetColl].nJet]       = nSVs;
-    
+
 	  //std::cout << "Filling jet-level " << std::endl;
 	  //std::cout << tagVars.getList(reco::btau::trackSumJetEtRatio,false).size() << std::endl;
-	  if(tagVars.getList(reco::btau::trackSumJetEtRatio,false).size())
-	    JetInfo[iJetColl].TagVarCSV_trackSumJetEtRatio[JetInfo[iJetColl].nJet]          = ( tagVars.getList(reco::btau::trackSumJetEtRatio,false).at(0));
-	  if(tagVars.getList(reco::btau::trackSumJetDeltaR,false).size())
-	    JetInfo[iJetColl].TagVarCSV_trackSumJetDeltaR[JetInfo[iJetColl].nJet]           = ( tagVars.getList(reco::btau::trackSumJetDeltaR,false).at(0));
-	  if(tagVars.getList(reco::btau::trackJetPt,false).size())
+	  if(tagVars.getList(reco::btau::trackJetPt,false).size()){
 	    JetInfo[iJetColl].TagVarCSV_trackJetPt[JetInfo[iJetColl].nJet]                  = ( tagVars.getList(reco::btau::trackJetPt,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackJetPt[JetInfo[iJetColl].nJet]                  = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::jetNTracks,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_jetNTracks[JetInfo[iJetColl].nJet]                  = ( tagVars.getList(reco::btau::jetNTracks,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_jetNTracks[JetInfo[iJetColl].nJet]                  = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::trackSumJetEtRatio,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_trackSumJetEtRatio[JetInfo[iJetColl].nJet]          = ( tagVars.getList(reco::btau::trackSumJetEtRatio,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackSumJetEtRatio[JetInfo[iJetColl].nJet]          = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::trackSumJetDeltaR,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_trackSumJetDeltaR[JetInfo[iJetColl].nJet]           = ( tagVars.getList(reco::btau::trackSumJetDeltaR,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackSumJetDeltaR[JetInfo[iJetColl].nJet]           = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::trackSip2dValAboveCharm,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_trackSip2dValAboveCharm[JetInfo[iJetColl].nJet]     = ( tagVars.getList(reco::btau::trackSip2dValAboveCharm,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackSip2dValAboveCharm[JetInfo[iJetColl].nJet]     = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::trackSip2dSigAboveCharm,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_trackSip2dSigAboveCharm[JetInfo[iJetColl].nJet]     = ( tagVars.getList(reco::btau::trackSip2dSigAboveCharm,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackSip2dSigAboveCharm[JetInfo[iJetColl].nJet]     = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::trackSip3dValAboveCharm,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_trackSip3dValAboveCharm[JetInfo[iJetColl].nJet]     = ( tagVars.getList(reco::btau::trackSip3dValAboveCharm,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackSip3dValAboveCharm[JetInfo[iJetColl].nJet]     = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::trackSip3dSigAboveCharm,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_trackSip3dSigAboveCharm[JetInfo[iJetColl].nJet]     = ( tagVars.getList(reco::btau::trackSip3dSigAboveCharm,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_trackSip3dSigAboveCharm[JetInfo[iJetColl].nJet]     = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::vertexCategory,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_vertexCategory[JetInfo[iJetColl].nJet]              = ( tagVars.getList(reco::btau::vertexCategory,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_vertexCategory[JetInfo[iJetColl].nJet]              = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::jetNSecondaryVertices,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_jetNSecondaryVertices[JetInfo[iJetColl].nJet]       = ( tagVars.getList(reco::btau::jetNSecondaryVertices,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_jetNSecondaryVertices[JetInfo[iJetColl].nJet]       = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::vertexMass,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_vertexMass[JetInfo[iJetColl].nJet]                  = ( tagVars.getList(reco::btau::vertexMass,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_vertexMass[JetInfo[iJetColl].nJet]                  = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::vertexNTracks,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_vertexNTracks[JetInfo[iJetColl].nJet]               = ( tagVars.getList(reco::btau::vertexNTracks,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_vertexNTracks[JetInfo[iJetColl].nJet]               = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::vertexEnergyRatio,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_vertexEnergyRatio[JetInfo[iJetColl].nJet]           = ( tagVars.getList(reco::btau::vertexEnergyRatio,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_vertexEnergyRatio[JetInfo[iJetColl].nJet]           = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::vertexJetDeltaR,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_vertexJetDeltaR[JetInfo[iJetColl].nJet]             = ( tagVars.getList(reco::btau::vertexJetDeltaR,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_vertexJetDeltaR[JetInfo[iJetColl].nJet]             = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::flightDistance2dVal,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_flightDistance2dVal[JetInfo[iJetColl].nJet]         = ( tagVars.getList(reco::btau::flightDistance2dVal,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_flightDistance2dVal[JetInfo[iJetColl].nJet]         = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::flightDistance2dSig,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_flightDistance2dSig[JetInfo[iJetColl].nJet]         = ( tagVars.getList(reco::btau::flightDistance2dSig,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_flightDistance2dSig[JetInfo[iJetColl].nJet]         = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::flightDistance3dVal,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_flightDistance3dVal[JetInfo[iJetColl].nJet]         = ( tagVars.getList(reco::btau::flightDistance3dVal,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_flightDistance3dVal[JetInfo[iJetColl].nJet]         = 0;
+	  }
+
+	  if(tagVars.getList(reco::btau::flightDistance3dSig,false).size()){
+	    JetInfo[iJetColl].TagVarCSV_flightDistance3dSig[JetInfo[iJetColl].nJet]         = ( tagVars.getList(reco::btau::flightDistance3dSig,false).at(0));
+	  }else{
+	    JetInfo[iJetColl].TagVarCSV_flightDistance3dSig[JetInfo[iJetColl].nJet]         = 0;
+	  }
 
 
           std::vector<float> tagValList = tagVars.getList(reco::btau::trackMomentum,false);
@@ -676,19 +778,18 @@ void BTagHLTAnalyzerT<IPTI,VTX>::processHLTJets(const edm::Handle<JetColl>& jets
 	  JetInfo[iJetColl].Jet_nLastTrkTagVar[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkTagVar;
 
 
-	  JetInfo[iJetColl].Jet_nFirstTrkTagVarCSV[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkTagVarCSV;
+	  //JetInfo[iJetColl].Jet_nFirstTrkTagVarCSV[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkTagVarCSV;
+	  //JetInfo[iJetColl].nTrkTagVarCSV += tagVars.getList(reco::btau::trackSip2dValAboveCharm,false).size();
+	  //JetInfo[iJetColl].Jet_nLastTrkTagVarCSV[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkTagVarCSV;
 
-          tagValList = tagVars.getList(reco::btau::trackSip2dValAboveCharm,false);
-          if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_trackSip2dValAboveCharm[JetInfo[iJetColl].nTrkTagVarCSV] );
-          tagValList = tagVars.getList(reco::btau::trackSip2dSigAboveCharm,false);
-          if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_trackSip2dSigAboveCharm[JetInfo[iJetColl].nTrkTagVarCSV] );
-          tagValList = tagVars.getList(reco::btau::trackSip3dValAboveCharm,false);
-          if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_trackSip3dValAboveCharm[JetInfo[iJetColl].nTrkTagVarCSV] );
-          tagValList = tagVars.getList(reco::btau::trackSip3dSigAboveCharm,false);
-          if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_trackSip3dSigAboveCharm[JetInfo[iJetColl].nTrkTagVarCSV] );
+	  JetInfo[iJetColl].Jet_nFirstTrkEtaRelTagVarCSV[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkEtaRelTagVarCSV;
+	  tagValList = tagVars.getList(reco::btau::trackEtaRel,false);
+	  JetInfo[iJetColl].TagVarCSV_jetNTracksEtaRel[JetInfo[iJetColl].nJet] = tagValList.size();
 
-	  JetInfo[iJetColl].nTrkTagVarCSV += tagVars.getList(reco::btau::trackSip2dValAboveCharm,false).size();
-	  JetInfo[iJetColl].Jet_nLastTrkTagVarCSV[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkTagVarCSV;
+	  if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_trackEtaRel[JetInfo[iJetColl].nTrkEtaRelTagVarCSV] );
+
+	  JetInfo[iJetColl].nTrkEtaRelTagVarCSV += JetInfo[iJetColl].TagVarCSV_jetNTracksEtaRel[JetInfo[iJetColl].nJet];
+	  JetInfo[iJetColl].Jet_nLastTrkEtaRelTagVarCSV[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nTrkEtaRelTagVarCSV;
 
 	  // per jet per secondary vertex
 	  JetInfo[iJetColl].Jet_nFirstSVTagVar[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nSVTagVar;
@@ -707,12 +808,6 @@ void BTagHLTAnalyzerT<IPTI,VTX>::processHLTJets(const edm::Handle<JetColl>& jets
 	  if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVar_flightDistance3dVal[JetInfo[iJetColl].nSVTagVar] );
 	  tagValList = tagVars.getList(reco::btau::flightDistance3dSig,false);
 	  if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVar_flightDistance3dSig[JetInfo[iJetColl].nSVTagVar] );
-	  tagValList = tagVars.getList(reco::btau::vertexEnergyRatio,false);
-	  //std::cout << "Filling vertex " << std::endl;
-	  if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_vertexEnergyRatio[JetInfo[iJetColl].nSVTagVar] );
-	  tagValList = tagVars.getList(reco::btau::vertexCategory,false);
-	  if(tagValList.size()>0) std::copy( tagValList.begin(), tagValList.end(), &JetInfo[iJetColl].TagVarCSV_vertexCategory[JetInfo[iJetColl].nSVTagVar] );
-
 
 	  JetInfo[iJetColl].nSVTagVar += nSVs;
 	  JetInfo[iJetColl].Jet_nLastSVTagVar[JetInfo[iJetColl].nJet] = JetInfo[iJetColl].nSVTagVar;
@@ -723,7 +818,6 @@ void BTagHLTAnalyzerT<IPTI,VTX>::processHLTJets(const edm::Handle<JetColl>& jets
 
 
       reco::TrackKinematics allKinematics;
-
 
       JetInfo[iJetColl].Jet_nFirstTrack[JetInfo[iJetColl].nJet]  = JetInfo[iJetColl].nTrack;
 
